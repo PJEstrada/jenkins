@@ -1,0 +1,44 @@
+version: '2.3'
+
+volumes:
+  jenkins_home:
+    external: true
+
+services:
+  jenkins:
+    build:
+      context: .
+    image: dpaws/jenkins
+    environment:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SESSION_TOKEN
+      - DOCKER_GID
+      - JENKINS_USERNAME
+      - JENKINS_PASSWORD
+      - KMS_JENKINS_PASSWORD
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8080/login"]
+      interval: 5s
+      retries: 60
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8080"
+  jenkins-slave:
+    build:
+      context: .
+      dockerfile: Dockerfile.slave
+      args:
+        JENKINS_SLAVE_VERSION: ${JENKINS_SLAVE_VERSION}
+    image: dpaws/jenkins-slave
+    environment:
+      - DOCKER_GID
+      - JENKINS_URL=http://jenkins:8080/
+      - JENKINS_USERNAME
+      - JENKINS_SLAVE_LABELS
+      - JENKINS_PASSWORD
+      - KMS_JENKINS_PASSWORD
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

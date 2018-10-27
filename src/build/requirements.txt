@@ -1,0 +1,10 @@
+urllib3==1.22
+idna==2.5
+pynacl
+ansible
+boto
+boto3
+docker-compose
+awscli
+netaddr
+ndg-httpsclient
